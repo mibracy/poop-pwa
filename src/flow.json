@@ -1,0 +1,71 @@
+[{
+    "index" : 0,
+    "question": "Let's start to tracking those movements!",
+    "caretakerID" : "The unique identifier for the person.",
+    "patientID" : "The unique identifier for the person.",
+    "rifaxPres": "Whether or not perscribed rifaximin. (Y/N)",
+    "maxBM": "Max number of BMs desired in a day.",
+    "idealBM": "Goal number of BMs without evidence of active HE.",
+    "alarmMaxBM": "Number of BMs over which patient should seek care.",
+    "providerNumber": "Phone Number for the provider to call."
+},{
+    "index" : 1,
+    "question": "How many bowel movements did you have today?",
+    "numBM": 0
+},{
+    "index" : 2,
+    "question": "How many doses of lactulose did you take today?",
+    "numLact": 0
+},{
+    "index" : 3,
+    "question": "Did you take your perscribed rifaximin today?",
+    "rifaxYN": ""
+},{
+    "index" : 4,
+    "question": "Is the patient confused sleepier than normal, slow to respond to questions, or having difficulty speaking?",
+    "HEyn": ""
+},{
+    "index" : 5,
+    "question": "Todo: Logic question choice",
+    "question_HEyn_N": "There is no concern for hepatic encephalopathy right now, but that is a concerning number of bowel movements. Please contact your provider at [providerNumber] or present to the ED f having signs of dehydration (dizzines, low blood pressure, etc).",
+    "question_HEyn_N_Alarm": "Fantastic! Coutinue to take your lactulose as perscribed to have [idealBM] bowel movments and check in tomorrow or as needed if you have any concerns.",
+    "question_HEyn_Y_Alarm": "That is a concerning number of bowel movements. Please contact your provider at [providerNumber] or present to the ED if having symptoms of dehydration (dizziness, low blood pressure, etc).",
+    "question_HEyn_Y": "Please give the perscribed rifaximin today and 1-2 doses of lactulose and check back in two hours. If the patient is still having any of the above symptoms at that time, please call your provider at [providerNumber] or present to the ED.",
+    "question_HEyn_Y_Additional": "Please give an additional 1-2 doses of lactulose and check back in two hours. If the patient is still having any of the above symptoms at that time, please call your provider at [providerNumber] or present to the ED."
+},{
+    "index" : 6,
+    "question" : "How many doses of lactulose has the patient taken since the last check in?",
+    "numLactCheckOne" : 0
+},{
+    "index" : 7,
+    "question" : "How many bowel movements has the patient had today total?",
+    "numBMCheckOne" : 0
+},{
+    "index" : 8,
+    "question" : "Is the patient confused, sleepier than normal, slow to respond, or having difficulty",
+    "HEynCheckOne" : ""
+},{
+    "index" : 9,
+    "question": "Good! Please continue to take lactulose doses until the patient has [maxBM] bowel movements and check back in 2 hours.",
+    "question_Y" : "Please call your provider at [providerNumber] or present to the ED for further care.",
+    "resolvedHEBMNum" : 0,
+    "HEynCheckOne" : ""
+},{
+    "index" : 10,
+    "question" : "How many doses of lactulose has the patient taken since the last check in?",
+    "numLactCheckTwo" : 0
+},{
+    "index" : 11,
+    "question" : "How many bowel movements has the patient had today total?",
+    "numBMCheckTwo" : 0
+},{
+    "index" : 12,
+    "question" : "Is the patient confused, sleepier than normal, slow to respond, or having difficulty",
+    "HEynCheckTwo" : ""
+},{
+    "index" : 13,
+    "question": "Good! You can resume the patients normal lactulose scheudle tomorrow. Please check back in again tomorrow as well.",
+    "question_Y" : "Please call your provider at [providerNumber] or present to the ED for further care.",
+    "resolvedHEBMNum" : 0,
+    "HEynCheckTwo" : ""
+}]
