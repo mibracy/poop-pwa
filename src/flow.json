@@ -26,8 +26,8 @@
     "HEyn": ""
 },{
     "index" : 5,
-    "question": "Todo: Logic question choice",
-    "question_HEyn_N": "There is no concern for hepatic encephalopathy right now, but that is a concerning number of bowel movements. Please contact your provider at [providerNumber] or present to the ED f having signs of dehydration (dizzines, low blood pressure, etc).",
+    "question": "Should be unreachable... Hard to squish bug!",
+    "question_HEyn_N": "There is no concern for hepatic encephalopathy right now, but that is a concerning number of bowel movements. Please contact your provider at [providerNumber] or present to the ED if having signs of dehydration (dizzines, low blood pressure, etc).",
     "question_HEyn_N_Alarm": "Fantastic! Coutinue to take your lactulose as perscribed to have [idealBM] bowel movments and check in tomorrow or as needed if you have any concerns.",
     "question_HEyn_Y_Alarm": "That is a concerning number of bowel movements. Please contact your provider at [providerNumber] or present to the ED if having symptoms of dehydration (dizziness, low blood pressure, etc).",
     "question_HEyn_Y": "Please give the perscribed rifaximin today and 1-2 doses of lactulose and check back in two hours. If the patient is still having any of the above symptoms at that time, please call your provider at [providerNumber] or present to the ED.",
@@ -42,7 +42,7 @@
     "numBMCheckOne" : 0
 },{
     "index" : 8,
-    "question" : "Is the patient confused, sleepier than normal, slow to respond, or having difficulty",
+    "question" : "Is the patient confused, sleepier than normal, slow to respond, or having difficulty speaking?",
     "HEynCheckOne" : ""
 },{
     "index" : 9,
@@ -60,7 +60,7 @@
     "numBMCheckTwo" : 0
 },{
     "index" : 12,
-    "question" : "Is the patient confused, sleepier than normal, slow to respond, or having difficulty",
+    "question" : "Is the patient confused, sleepier than normal, slow to respond, or having difficulty speaking?",
     "HEynCheckTwo" : ""
 },{
     "index" : 13,

@@ -26,6 +26,8 @@
 
 .App-link {
   color: #61dafb;
+  cursor: pointer;
+  text-decoration: underline;
 }
 
 .response {
@@ -46,6 +48,11 @@
   padding: 13px;
 }
 
+#patientsView {
+  margin: 42px;
+  padding: 13px;
+  width: 80vw;
+}
 
 .card {
   margin-right: auto;

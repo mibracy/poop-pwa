@@ -7,7 +7,6 @@ import ButtonGroup from "@mui/material/ButtonGroup";
 import Card from "@mui/material/Card";
 import Grid from "@mui/material/Grid";
 import TextField from "@mui/material/TextField";
-import Calendar from 'react-calendar';
 import "./App.css";
 
 const darkTheme = createTheme({
@@ -41,113 +40,220 @@ function App() {
 
     const [resolvedHEBMNum, setResolvedHEBMNum] = useState("");
    
-
     const [date, onChangeDate] = useState(new Date());
 
-      const fetchPrompt = ((progress) => {
-            let question = flow[progress][`question`];
-            console.log(question);
+    const [session, setSession] = useState([{}]);
 
-            if (progress == 3 && rifaxPres === 'N' ){
-                setProgress(4);
-            }
+    const fetchPrompt = (() => {
+        let question = flow[progress][`question`];
 
-            if (progress == 5 && HEyn === 'Y' && numBM >= alarmMaxBM ){
-                question = rifaxYN ==='Y' ? flow[progress][`question_HEyn_Y_Alarm`] : flow[progress][`question_HEyn_Y_Alarm`] + " Please take your doses of rifaximin." ;
-                document.getElementById(`next`)?.classList.add(`hidden`);
-                document.getElementById(`download`)?.classList.remove(`hidden`);
-            } else if (progress == 5 && HEyn === 'Y' && (rifaxYN === 'Y' || rifaxPres === 'Y')) {
-                question = flow[progress][`question_HEyn_Y_Additional`];
-            } else if (progress == 5 && HEyn === 'N' && numBM >= alarmMaxBM) {
-                question = rifaxYN ==='Y' ? flow[progress][`question_HEyn_N_Alarm`] : flow[progress][`question_HEyn_N_Alarm`] + " Please take your doses of rifaximin." ;
-                document.getElementById(`next`)?.classList.add(`hidden`);
-                document.getElementById(`download`)?.classList.remove(`hidden`);
-            } else if (progress == 5 && HEyn === 'N' && numBM < alarmMaxBM) {
-                question = flow[progress][`question_HEyn_N`];
-                document.getElementById(`next`)?.classList.add(`hidden`);
-                document.getElementById(`download`)?.classList.remove(`hidden`);
-            } else if (progress == 5 && HEyn === 'Y' && rifaxYN === 'N'){
-                question = flow[progress][`question_HEyn_Y`];
-            }
+        if (progress === 3 && rifaxPres === 'N' ){
+            setProgress(4);
+        }
 
-            if (progress == 9 && HEynCheckOne === 'Y' ){
-                question = flow[progress][`question_Y`];
-                document.getElementById(`next`)?.classList.add(`hidden`);
-                document.getElementById(`download`)?.classList.remove(`hidden`);
-            } else if (progress == 9 && HEynCheckOne === 'N') {
-                question = flow[progress][`question_N`];
-            }
+        if (progress === 5 && HEyn === 'Y' && numBM >= alarmMaxBM ){
+            question = rifaxYN ==='Y' ? flow[progress][`question_HEyn_Y_Alarm`] : flow[progress][`question_HEyn_Y_Alarm`] + " Please take your doses of rifaximin." ;
+            document.getElementById(`next`)?.classList.add(`hidden`);
+        } else if (progress === 5 && HEyn === 'Y' && (rifaxYN === 'Y' || rifaxPres === 'Y')) {
+            question = flow[progress][`question_HEyn_Y_Additional`];
+        } else if (progress === 5 && HEyn === 'N' && numBM >= alarmMaxBM) {
+            question = rifaxYN ==='Y' ? flow[progress][`question_HEyn_N_Alarm`] : flow[progress][`question_HEyn_N_Alarm`] + " Please take your doses of rifaximin." ;
+            document.getElementById(`next`)?.classList.add(`hidden`);
+        } else if (progress === 5 && HEyn === 'N' && numBM < alarmMaxBM) {
+            question = flow[progress][`question_HEyn_N`];
+            document.getElementById(`next`)?.classList.add(`hidden`);
+        } else if (progress === 5 && HEyn === 'Y' && rifaxYN !== 'Y'){
+            question = flow[progress][`question_HEyn_Y`];
+        }
 
-            if (progress == 13 && HEynCheckOne === 'Y' ){
-                question = flow[progress][`question_Y`];
-                document.getElementById(`download`)?.classList.remove(`hidden`);
-            }
+        if (progress === 9 && HEynCheckOne === 'Y' ){
+            question = flow[progress][`question_Y`];
+            document.getElementById(`next`)?.classList.add(`hidden`);
+        } else if (progress === 9 && HEynCheckOne === 'N') {
+            setResolvedHEBMNum(numBMCheckOne);
+        }
 
-            console.log(question);
+        if (progress === 13 && HEynCheckTwo === 'Y' ){
+            question = flow[progress][`question_Y`];
+            document.getElementById(`next`)?.classList.add(`hidden`);
+        } else if (progress === 13 && HEynCheckTwo === 'N') {
+            setResolvedHEBMNum(numBMCheckTwo);
+            document.getElementById(`next`)?.classList.add(`hidden`);
+        }
 
-            return question?.replaceAll(`[providerNumber]`, providerNumber)
+        
+        return question?.replaceAll(`[providerNumber]`, providerNumber)
                             .replaceAll(`[maxBM]`, maxBM)
                             .replaceAll(`[idealBM]`, idealBM);
-          });
-    const memoizedVal = useMemo(() => fetchPrompt(progress), [progress]);
+    });
+    const memoizedVal = useMemo(() => fetchPrompt(), [progress]);
 
     useEffect(()=>{
         if (caretakerID !== "" && patientID !== "" && rifaxPres !== "" && providerNumber !== "" && maxBM !== "" && idealBM !== "" && alarmMaxBM !== ""){
             document.getElementById(`questionaire`)?.classList.remove(`hidden`);
-            document.getElementById(`prompt`)?.classList.add(`hidden`);
         } else {
             document.getElementById(`questionaire`)?.classList.add(`hidden`);
         }
     }, [caretakerID, patientID, rifaxPres, providerNumber, maxBM, idealBM, alarmMaxBM])
 
 	const start = () => {
+        let junk = session;
+        junk.shift();
+        setSession(junk);
+
 		document.getElementById(`adminPanel`)?.classList.remove(`hidden`);
 		document.getElementById(`start`)?.classList.add(`hidden`);
+        document.getElementById(`patients`)?.classList.remove(`hidden`);
+        document.getElementById(`control`)?.classList.add(`hidden`);
         document.getElementById(`prompt`)?.classList.add(`hidden`);
 	}
 
-    const calender = () => {
-        document.getElementById(`calendarView`)?.classList.toggle(`hidden`);
+    const newPatient = () => {
+        setProgress(0);
+
+		document.getElementById(`adminPanel`)?.classList.remove(`hidden`);
+		document.getElementById(`start`)?.classList.add(`hidden`);
+        document.getElementById(`patients`)?.classList.remove(`hidden`);
+        document.getElementById(`control`)?.classList.add(`hidden`);
 	}
 
+    const patients = () => {
+        document.getElementById(`patientsView`)?.classList.toggle(`hidden`);
+	}
 
     const questionaire = () => {
+        setProgress(1)
+        setHEyn("");
+        setHEynCheckOne("");
+        setHEynCheckTwo("");
+        setNumBM("");
+        setNumBMCheckOne("");
+        setNumBMCheckTwo("");
+        setNumLact("");
+        setNumLactCheckOne("");
+        setNumLactCheckTwo("");
+        setResolvedHEBMNum("");
+        setRifaxYN("");
+        onChangeDate(new Date());
         document.getElementById(`prompt`)?.classList.remove(`hidden`);
 		document.getElementById(`control`)?.classList.remove(`hidden`);
+        document.getElementById(`prev`)?.classList.add(`hidden`);
+        document.getElementById(`next`)?.classList.remove(`hidden`);
 		document.getElementById(`adminPanel`)?.classList.add(`hidden`);
-        setProgress(progress + 1)
+        document.getElementById(`patientsView`)?.classList.add(`hidden`);
 	}
 
 	const prev = () => {
-        setProgress(progress - 1)
-        document.getElementById(`adminPanel`)?.classList.add(`hidden`);
-        document.getElementById(`download`)?.classList.add(`hidden`);
-        document.getElementById(`next`)?.classList.remove(`hidden`);
+        setProgress(progress - 1);
+        onChangeDate(new Date());
+        storeSession();
 
-         if (progress == 1){
+        if (progress === 1){
             document.getElementById(`prev`)?.classList.add(`hidden`);
-       }
+        }
+
+        document.getElementById(`adminPanel`)?.classList.add(`hidden`);
+        document.getElementById(`next`)?.classList.remove(`hidden`);
 	}
 
 	const next = () => {
-        if (progress==13){
-            document.getElementById(`next`)?.classList.add(`hidden`);
-            return;
-        }
-
         setProgress(progress + 1);
+        onChangeDate(new Date());
+        storeSession();
         document.getElementById(`prev`)?.classList.remove(`hidden`);
 	}
     
+    const storeSession = () => {
+       let data = Object.fromEntries(new FormData(document.querySelector('form')).entries())
+
+        let tmp = { "unique": Date.now(),
+                    "caretakerID": data.caretakerID, 
+                    "patientID": data.patientID, 
+                    "progress": data.progress, 
+                    "date": data.date,                    
+                    "time": data.time,
+                    "rifaxPres": data.rifaxPres,
+                    "providerNumber": data.providerNumber,
+                    "maxBM": data.maxBM,
+                    "idealBM": data.idealBM,
+                    "alarmMaxBM": data.alarmMaxBM,
+                    "numBM": data.numBM,
+                    "numLact": data.numLact,
+                    "rifaxYN": data.rifaxYN,
+                    "HEyn": data.HEyn,
+                    "numLactCheckOne": data.numLactCheckOne,
+                    "numBMCheckOne": data.numBMCheckOne,
+                    "HEynCheckOne": data.HEynCheckOne,
+                    "numLactCheckTwo": data.numLactCheckTwo,
+                    "numBMCheckTwo": data.numBMCheckTwo,
+                    "HEynCheckTwo": data.HEynCheckTwo,
+                    "resolvedHEBMNum": data.resolvedHEBMNum };
+       ;
+
+        let shift = session;
+        let lastShift = shift.pop();
+        if (lastShift !== undefined 
+            && ( lastShift[`caretakerID`] !== tmp[`caretakerID`]  || lastShift[`patientID`] !== tmp[`patientID`] )) {
+                shift.push(lastShift);
+        }
+
+        shift.push(tmp);
+        setSession(shift);
+    }
+
 	const admin = () => { document.getElementById(`adminPanel`)?.classList.toggle(`hidden`); }
 
-    var datetime = "PoopData for " + date.getDate() + "/"
-        + (date.getMonth()+1)  + "/" 
-        + date.getFullYear() + " @ "  
-        + date.getHours() + ":"  
-        + date.getMinutes() + ":" 
-        + date.getSeconds();
+    const load = (e) => {
+        document.getElementById(`next`)?.classList.remove(`hidden`);
+        document.getElementById(`prev`)?.classList.remove(`hidden`);
+        document.getElementById(`prompt`)?.classList.remove(`hidden`);
+        document.getElementById(`patientsView`)?.classList.add(`hidden`);
 
+        let patientUni = e.target.id;
+        var result = session.find(obj => obj[`unique`] == patientUni)
+
+        setProgress( Number(result[`progress`]));
+        setAlarmMaxBM(result[`alarmMaxBM`]);
+        setCaretakerID(result[`caretakerID`]);
+        setHEyn(result[`HEyn`]);
+        setHEynCheckOne(result[`HEynCheckOne`]);
+        setHEynCheckTwo(result[`HEynCheckTwo`]);
+        setIdealBM(result[`idealBM`]);
+        setMaxBM(result[`maxBM`]);
+        setNumBM(result[`numBM`]);
+        setNumBMCheckOne(result[`numBMCheckOne`]);
+        setNumBMCheckTwo(result[`numBMCheckTwo`]);
+        setNumLact(result[`numLact`]);
+        setNumLactCheckOne(result[`numLactCheckOne`]);
+        setNumLactCheckTwo(result[`numLactCheckTwo`]);
+        setPatientID(result[`patientID`]);
+        setProviderNumber(result[`providerNumber`]);
+        setResolvedHEBMNum(result[`resolvedHEBMNum`]);
+        setRifaxPres(result[`rifaxPres`]);
+        setRifaxYN(result[`rifaxYN`]);
+    }
+
+    var startDate = "PoopData Session For " + date.getDate() + "/"
+        + (date.getMonth() + 1)  + "/" 
+        + date.getFullYear() ;
+
+    var startTime = " @ " 
+        + (date.getHours() < 10 ? '0' : '') + date.getHours() + ":"  
+        + (date.getMinutes() < 10 ? '0' : '') + date.getMinutes();
+
+    var patientsList = session.reverse().map(function(el){
+                    return <ul onClick={load} id={el['unique']} className="App-link">{el['caretakerID'] + " for " + el['patientID'] + " Stage " + el['progress'] + el[`time`]}</ul>;
+                    });
+
+    function phoneFormat(input) { //returns (###) ###-####
+        input = input.replace(/\D/g,'');
+        var size = input.length;
+        if (size>0) {input="("+input}
+        if (size>3) {input=input.slice(0,4)+") "+input.slice(4,11)}
+        if (size>6) {input=input.slice(0,9)+"-" +input.slice(9)}
+        return input; 
+    }
+    
 	return (
 		<div className="App">
 			<ThemeProvider theme={darkTheme}>
@@ -155,128 +261,138 @@ function App() {
 
 				<form className="App-header">
 					<img src={`logo192.png`} srcSet={`logo192.png`} alt={`poop-logo`} onClick={admin} loading="lazy" />
-                    <input className="hidden" id="date" name="date" value={datetime}/>
-					<p className="card">Poop PWA - Stage {progress}</p>
+                    <input className="hidden" id="date" name="date" value={startDate}/>
+                    <input className="hidden" id="time" name="time" value={startTime}/>
+                    <input className="hidden" id="progress" name="progress" value={progress || ''}/>
+					<p className="card">Poop PWA - Stage {progress || ''}</p>
 
-					<div id="prompt" className="questions card">{memoizedVal}</div>
+					<div id="prompt" className="questions card">{memoizedVal || ''}</div>
 
                     <TextField 
                         id="numBm" 
                         name="numBM" 
-                        label="Bowel Movements (Number)" 
-                        inputProps={{ className: `${progress === 1 ? "" : "hidden"}` }} 
+                        label="Number" 
+                        inputProps={{ className: `${progress === 1 ? "" : "hidden"}`,
+                                        inputMode: `numeric` }} 
                         variant="filled" 
-                        value={numBM}  
+                        value={numBM || ''}  
                         onChange={(e) => setNumBM(e.target.value)}
                         />
                     <TextField 
                         id="numLact" 
                         name="numLact" 
-                        label="Laculose (Number)" 
-                        inputProps={{ className: `${progress === 2 ? "" : "hidden"}` }} 
+                        label="Number" 
+                        inputProps={{ className: `${progress === 2 ? "" : "hidden"}`,
+                                        inputMode: `numeric` }} 
                         variant="filled" 
-                        value={numLact}  
+                        value={numLact || ''}  
                         onChange={(e) => setNumLact(e.target.value)}
                         />
                     <TextField 
                         id="rifaxYN" 
                         name="rifaxYN" 
-                        label="rifax (Y/N)" 
+                        label="Y/N" 
                         inputProps={{ className: `${progress === 3 ? "" : "hidden"}` }} 
                         variant="filled" 
-                        value={rifaxYN}  
+                        value={rifaxYN || ''}  
                         onChange={(e) => e.target.value.toUpperCase() ==='Y' || e.target.value.toUpperCase() ==='N' ? setRifaxYN(e.target.value.toUpperCase()) : setRifaxYN('')} 
                         />
                     <TextField 
                         id="HEyn" 
                         name="HEyn" 
-                        label="HE (Y/N)" 
+                        label="Y/N" 
                         inputProps={{ className: `${progress === 4 ? "" : "hidden"}` }} 
                         variant="filled" 
-                        value={HEyn}  
+                        value={HEyn || ''}  
                         onChange={(e) => e.target.value.toUpperCase() ==='Y' || e.target.value.toUpperCase() ==='N' ? setHEyn(e.target.value.toUpperCase()) : setHEyn('')} 
                         />
                     <TextField 
                         id="numLactCheckOne" 
                         name="numLactCheckOne" 
-                        label="Laculose (Number)" 
-                        inputProps={{ className: `${progress === 6 ? "" : "hidden"}` }} 
+                        label="Number" 
+                        inputProps={{ className: `${progress === 6 ? "" : "hidden"}`,
+                                        inputMode: `numeric` }} 
                         variant="filled" 
-                        value={numLactCheckOne}  
+                        value={numLactCheckOne || ''}  
                         onChange={(e) => setNumLactCheckOne(e.target.value)}
                         />
                     <TextField 
                         id="numBMCheckOne" 
                         name="numBMCheckOne" 
-                        label="Bowel Movements (Number)" 
-                        inputProps={{ className: `${progress === 7 ? "" : "hidden"}` }} 
+                        label="Number" 
+                        inputProps={{ className: `${progress === 7 ? "" : "hidden"}`,
+                                        inputMode: `numeric` }} 
                         variant="filled"
-                        value={numBMCheckOne}  
+                        value={numBMCheckOne || ''}  
                         onChange={(e) => setNumBMCheckOne(e.target.value)} 
                         />
                     <TextField 
                         id="HEynCheckOne"
                         name="HEynCheckOne" 
-                        label="HE (Y/N)" 
+                        label="Y/N" 
                         inputProps={{ className: `${progress === 8 ? "" : "hidden"}` }} 
                         variant="filled" 
-                        value={HEynCheckOne}  
+                        value={HEynCheckOne || ''}  
                         onChange={(e) => e.target.value.toUpperCase() ==='Y' || e.target.value.toUpperCase() ==='N' ? setHEynCheckOne(e.target.value.toUpperCase()) : setHEynCheckOne('')} 
                         />
                     <TextField 
                         id="resolvedHEBMNum"
                         name="resolvedHEBMNum" 
-                        label="Laculose (Number)" 
-                        inputProps={{ className: `${progress === 9 ? "" : "hidden"}` }} 
+                        label="Number" 
+                        disabled
+                        inputProps={{ className: `${progress === 9 ? "hidden" : "hidden"}`,
+                                        inputMode: `numeric` }} 
                         variant="filled" 
-                        value={resolvedHEBMNum}  
+                        value={resolvedHEBMNum || ''}  
                         onChange={(e) => setResolvedHEBMNum(e.target.value)}
                         />
                     <TextField 
                         id="HEynCheckOne"
                         name="HEynCheckOne" 
-                        label="Laculose (Number)" 
-                        inputProps={{ className: `${progress === 9 ? "" : "hidden"}` }} 
+                        label="Number" 
+                        inputProps={{ className: `${progress === 9 ? "hidden" : "hidden"}` }} 
                         variant="filled" 
-                        value={HEynCheckOne}  
+                        value={HEynCheckOne || ''}  
                         onChange={(e) => e.target.value.toUpperCase() ==='Y' || e.target.value.toUpperCase() ==='N' ? setHEynCheckOne(e.target.value.toUpperCase()) : setHEynCheckOne('')} 
                         />
                     <TextField 
                         id="numLactCheckTwo" 
                         name="numLactCheckTwo" 
-                        label="HE (Y/N)" 
+                        label="Number" 
                         inputProps={{ className: `${progress === 10 ? "" : "hidden"}` }} 
                         variant="filled"
-                        value={numLactCheckTwo}  
+                        value={numLactCheckTwo || ''}  
                         onChange={(e) =>  setNumLactCheckTwo(e.target.value) } 
                         />
                     <TextField 
                         id="numBMCheckTwo" 
                         name="numBMCheckTwo" 
-                        label="Bowel Movements (Number)" 
-                        inputProps={{ className: `${progress === 12 ? "" : "hidden"}` }} 
+                        label="Number" 
+                        inputProps={{ className: `${progress === 11 ? "" : "hidden"}`,
+                                        inputMode: `numeric` }} 
                         variant="filled" 
-                        value={numBMCheckTwo}  
+                        value={numBMCheckTwo || ''}  
                         onChange={(e) => setNumBMCheckTwo(e.target.value)}
                         />
                     <TextField 
                         id="HEynCheckTwo"
                         name="HEynCheckTwo" 
-                        label="Laculose (Number)" 
+                        label="Number" 
                         inputProps={{ className: `${progress === 12 ? "" : "hidden"}` }} 
                         variant="filled" 
-                        value={HEynCheckTwo}  
+                        value={HEynCheckTwo || ''}  
                         onChange={(e) => e.target.value.toUpperCase() ==='Y' || e.target.value.toUpperCase() ==='N' ? setHEynCheckTwo(e.target.value.toUpperCase()) : setHEynCheckTwo('')} 
                         />
                     <TextField 
                         id="resolvedHEBMNum" 
                         name="resolvedHEBMNum" 
-                        label="Resolved HEBM (Number)" 
+                        label="Number" 
                         disabled
-                        inputProps={{ className: `${HEynCheckTwo == 'Y' && progress === 13 ? "" : "hidden"}` }} 
+                        inputProps={{ className: `${HEynCheckTwo === 'Y' && progress === 13 ? "" : "hidden"}` ,
+                                        inputMode: `numeric` }} 
                         variant="filled"
-                        value={resolvedHEBMNum}  
-                        onChange={(e) => setResolvedHEBMNum(e.target.value)} 
+                        value={resolvedHEBMNum || ''}  
+                        onChange={(e) => setResolvedHEBMNum(e.target.value)}
                         />
 
 					<Card id="adminPanel" className="hidden">
@@ -288,7 +404,7 @@ function App() {
                                     name="caretakerID" 
                                     label="caretakerID" 
                                     variant="outlined" 
-                                    value={caretakerID} 
+                                    value={caretakerID || ''} 
                                     onChange={(e) => setCaretakerID(e.target.value.toUpperCase())}
                                     />
                                 <TextField 
@@ -296,7 +412,7 @@ function App() {
                                     name="patientID" 
                                     label="patientID" 
                                     variant="outlined"
-                                    value={patientID} 
+                                    value={patientID || ''} 
                                     onChange={(e) => setPatientID(e.target.value.toUpperCase())}
                                     />
                             </Grid>
@@ -306,7 +422,7 @@ function App() {
                                     name="rifaxPres" 
                                     label="rifaxPres" 
                                     variant="outlined" 
-                                    value={rifaxPres} 
+                                    value={rifaxPres || ''} 
                                     onChange={(e) => e.target.value.toUpperCase() ==='Y' || e.target.value.toUpperCase() ==='N' ? setRifaxPres(e.target.value.toUpperCase()) : setRifaxPres('')} 
                                     />
                                 <TextField 
@@ -314,8 +430,8 @@ function App() {
                                     name="providerNumber" 
                                     label="providerNumber" 
                                     variant="outlined" 
-                                    value={providerNumber} 
-                                    onChange={(e) => setProviderNumber(e.target.value)}
+                                    value={providerNumber || ''} 
+                                    onChange={(e) => setProviderNumber(phoneFormat(e.target.value))}
                                     />
                             </Grid>
                             <Grid item>
@@ -324,7 +440,7 @@ function App() {
                                     name="maxBM" 
                                     label="maxBM" 
                                     variant="outlined" 
-                                    value={maxBM}  
+                                    value={maxBM || ''}  
                                     onChange={(e) => setMaxBM(e.target.value)} 
                                     />
                                 <TextField 
@@ -332,7 +448,7 @@ function App() {
                                     name="idealBM" 
                                     label="idealBM" 
                                     variant="outlined" 
-                                    value={idealBM} 
+                                    value={idealBM || ''} 
                                     onChange={(e) => setIdealBM(e.target.value)} 
                                     />
                                 <TextField 
@@ -340,7 +456,7 @@ function App() {
                                     name="alarmMaxBM" 
                                     label="alarmMaxBM" 
                                     variant="outlined" 
-                                    value={alarmMaxBM} 
+                                    value={alarmMaxBM || ''} 
                                     onChange={(e) => setAlarmMaxBM(e.target.value)}
                                     />
                             </Grid>
@@ -350,9 +466,9 @@ function App() {
                         </ButtonGroup>
 					</Card>
 
-                    <div id="calendarView" className="card hidden">
-                        <div>{datetime}</div>
-                        <Calendar onChange={onChangeDate} value={date} />
+                    <div id="patientsView" className="card hidden">
+                        <div>{startDate}</div>
+                        {progress !== 0 &&  <ol>{ patientsList }</ol>}
                     </div>
       
 
@@ -360,20 +476,20 @@ function App() {
 						<Button id="prev" color="error" onClick={prev}>Previous</Button>
 						<Button id="next" color="success" onClick={next}>Next</Button>
 					</ButtonGroup>
+                    
+                    <Button id="start" className="start" variant="contained" onClick={start}>Start</Button>
 
 					<ButtonGroup id="navigation" variant="outlined" className="response" aria-label="outlined button group">
-                        <Button id="calendar" className="start" variant="contained" onClick={calender}>Calendar</Button>
+                        <Button id="patients" className="start hidden" variant="contained" onClick={patients}>Current Patient - {patientID || ''}</Button>
                         {progress !== 0 && <Button 
                                                 id="download" 
-                                                className="start hidden" 
+                                                className="start" 
                                                 variant="contained" 
                                                 href={`data:text/json;charset=utf-8,${encodeURIComponent(JSON.stringify(Object.fromEntries(new FormData(document.querySelector('form')).entries())))}`} 
-                                                download="poopData.json"
-                                                > Download Report </Button>}
-                        <Button id="start" className="start" variant="contained" onClick={start}>Start</Button>
+                                                download={`poopData ${patientID || ''} ${Date.now()}.json`}
+                                                > Download {patientID || ''} Report </Button>}
+                        {progress !== 0 && <Button id="newPatient" className="start" variant="contained" onClick={newPatient}>New Patient</Button>}
                     </ButtonGroup>
-
-					<TextField id="text" className="hidden" label="Outlined" variant="outlined" />
 				</form>
 			</ThemeProvider>
 		</div>
