@@ -6,9 +6,8 @@ import Button from "@mui/material/Button";
 import ButtonGroup from "@mui/material/ButtonGroup";
 import Grid from "@mui/material/Grid";
 import TextField from "@mui/material/TextField";
-import logo from "./logo192.png";
-import "./App.css";
 import addNotification from "react-push-notification";
+import "./App.css";
 
 const darkTheme = createTheme({
 	palette: {
@@ -218,7 +217,7 @@ function App() {
                     title: `Patient` + patientID + ` is due for a check in!`,
                     message: 'Last session progress Stage ' + progress ,
                     duration: 10000,
-                    icon: logo,
+                    icon: `logo192.png`,
                     native: true,
                     onClick: () => load(uni)
                 });
@@ -295,7 +294,7 @@ function App() {
 				<CssBaseline />
 
 				<form className="App-header">
-					<img src={`logo192.png`} srcSet={ logo } alt={`poop-logo`} onClick={ admin } loading="lazy" />
+					<img src={`logo192.png`} srcSet={ `logo192.png` } alt={`poop-logo`} onClick={ admin } loading="lazy" />
                     <input className="hidden" id="date" name="date" value={ startDate }/>
                     <input className="hidden" id="time" name="time" value={ startTime }/>
                     <input className="hidden" id="progress" name="progress" value={ progress }/>
