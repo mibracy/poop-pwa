@@ -1,16 +1,16 @@
 {
   "files": {
     "main.css": "/poop-pwa/static/css/main.61e0f319.css",
-    "main.js": "/poop-pwa/static/js/main.38234c82.js",
+    "main.js": "/poop-pwa/static/js/main.599d9f68.js",
     "static/js/787.43ab7eee.chunk.js": "/poop-pwa/static/js/787.43ab7eee.chunk.js",
     "service-worker.js": "/poop-pwa/service-worker.js",
     "index.html": "/poop-pwa/index.html",
     "main.61e0f319.css.map": "/poop-pwa/static/css/main.61e0f319.css.map",
-    "main.38234c82.js.map": "/poop-pwa/static/js/main.38234c82.js.map",
+    "main.599d9f68.js.map": "/poop-pwa/static/js/main.599d9f68.js.map",
     "787.43ab7eee.chunk.js.map": "/poop-pwa/static/js/787.43ab7eee.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.61e0f319.css",
-    "static/js/main.38234c82.js"
+    "static/js/main.599d9f68.js"
   ]
 }
