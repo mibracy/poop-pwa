@@ -109,7 +109,7 @@ function App() {
             message: 'Thank You!' ,
             duration: 5000,
             icon: `logo192.png`,
-            native: false,
+            native: true,
         });
 
 		document.getElementById(`adminPanel`)?.classList.remove(`hidden`);
