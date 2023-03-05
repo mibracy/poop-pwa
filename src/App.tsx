@@ -6,7 +6,7 @@ import Button from "@mui/material/Button";
 import ButtonGroup from "@mui/material/ButtonGroup";
 import Grid from "@mui/material/Grid";
 import TextField from "@mui/material/TextField";
-import logo from "./logo.png";
+import logo from "./logo192.png";
 import "./App.css";
 import addNotification from "react-push-notification";
 
