@@ -155,6 +155,13 @@ function App() {
         onChangeDate(new Date());
         storeSession(false);
 
+        if (progress === 4 && rifaxPres === 'N'){
+            setProgress(2);
+        } else if (progress === 4 && rifaxPres === 'Y') {
+            setProgress(3);
+        }
+
+
         if (progress === 1){
             document.getElementById(`prev`)?.classList.add(`hidden`);
         }
@@ -272,7 +279,11 @@ function App() {
         setResolvedHEBMNum(result[`resolvedHEBMNum`]);
         setRifaxPres(result[`rifaxPres`]);
         setRifaxYN(result[`rifaxYN`]);
-        setProgress(Number(result[`progress`]));
+
+        setTimeout(() => {         
+            setProgress(Number(result[`progress`]));
+        }, 1000);
+        
     }
 
     const phoneFormat = (input) => { //returns (###) ###-####
@@ -500,6 +511,7 @@ function App() {
                                     id="alarmMaxBM" 
                                     name="alarmMaxBM" 
                                     label="alarmMaxBM"
+
                                     inputProps={{ inputMode: `numeric` }}  
                                     variant="outlined" 
                                     value={ alarmMaxBM || '' } 
