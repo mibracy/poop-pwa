@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import flow from "./flow.json";
+import * as serviceWorker from './serviceWorkerRegistration';
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 import Button from "@mui/material/Button";
@@ -16,6 +17,25 @@ const darkTheme = createTheme({
 });
 
 function App() {
+    const [showReload, setShowReload] = React.useState(false);
+    const [waitingWorker, setWaitingWorker] = React.useState<ServiceWorker | null>(null);
+  
+    const onSWUpdate = (registration: ServiceWorkerRegistration) => {
+      setShowReload(true);
+      setWaitingWorker(registration.waiting);
+    };
+  
+    useEffect(() => {
+      serviceWorker.register({ onUpdate: onSWUpdate });
+    }, []);
+  
+    const reloadPage = () => {
+      waitingWorker?.postMessage({ type: 'SKIP_WAITING' });
+      setShowReload(false);
+      window.location.reload();
+    };
+
+
 	const [progress, setProgress] = useState(0);
 	const [caretakerID, setCaretakerID] = useState("");
 	const [patientID, setPatientID] = useState("");
@@ -260,7 +280,7 @@ function App() {
 				<CssBaseline />
 
 				<form className="App-header">
-					<img src={`logo192.png`} srcSet={`logo192.png`} alt={`poop-logo`} onClick={admin} loading="lazy" />
+					<img src={`logo192.png`} srcSet={`logo192.png`} alt={`poop-logo`} onClick={reloadPage} loading="lazy" />
                     <input className="hidden" id="date" name="date" value={startDate}/>
                     <input className="hidden" id="time" name="time" value={startTime}/>
                     <input className="hidden" id="progress" name="progress" value={progress || ''}/>
@@ -429,6 +449,7 @@ function App() {
                                     id="providerNumber" 
                                     name="providerNumber" 
                                     label="providerNumber" 
+                                    inputProps={{inputMode: `numeric` }} 
                                     variant="outlined" 
                                     value={providerNumber || ''} 
                                     onChange={(e) => setProviderNumber(phoneFormat(e.target.value))}
@@ -439,6 +460,7 @@ function App() {
                                     id="maxBM" 
                                     name="maxBM" 
                                     label="maxBM" 
+                                    inputProps={{inputMode: `numeric` }} 
                                     variant="outlined" 
                                     value={maxBM || ''}  
                                     onChange={(e) => setMaxBM(e.target.value)} 
@@ -447,6 +469,7 @@ function App() {
                                     id="idealBM" 
                                     name="idealBM" 
                                     label="idealBM" 
+                                    inputProps={{inputMode: `numeric` }} 
                                     variant="outlined" 
                                     value={idealBM || ''} 
                                     onChange={(e) => setIdealBM(e.target.value)} 
@@ -454,7 +477,8 @@ function App() {
                                 <TextField 
                                     id="alarmMaxBM" 
                                     name="alarmMaxBM" 
-                                    label="alarmMaxBM" 
+                                    label="alarmMaxBM"
+                                    inputProps={{inputMode: `numeric` }}  
                                     variant="outlined" 
                                     value={alarmMaxBM || ''} 
                                     onChange={(e) => setAlarmMaxBM(e.target.value)}
