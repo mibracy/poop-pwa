@@ -104,6 +104,13 @@ function App() {
         let junk = session;
         junk.shift();
         setSession(junk);
+        addNotification({
+            title: `Verifing Push Access...`,
+            message: 'Thank You!' ,
+            duration: 5000,
+            icon: `logo192.png`,
+            native: false,
+        });
 
 		document.getElementById(`adminPanel`)?.classList.remove(`hidden`);
 		document.getElementById(`start`)?.classList.add(`hidden`);
