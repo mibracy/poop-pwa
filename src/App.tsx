@@ -254,7 +254,6 @@ function App() {
 
         var result = session.find(obj => obj[`unique`] == id)
 
-        setProgress( Number(result[`progress`]));
         setAlarmMaxBM(result[`alarmMaxBM`]);
         setCaretakerID(result[`caretakerID`]);
         setHEyn(result[`HEyn`]);
@@ -273,6 +272,7 @@ function App() {
         setResolvedHEBMNum(result[`resolvedHEBMNum`]);
         setRifaxPres(result[`rifaxPres`]);
         setRifaxYN(result[`rifaxYN`]);
+        setProgress(Number(result[`progress`]));
     }
 
     const phoneFormat = (input) => { //returns (###) ###-####
