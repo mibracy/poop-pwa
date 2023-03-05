@@ -17,25 +17,6 @@ const darkTheme = createTheme({
 });
 
 function App() {
-    const [showReload, setShowReload] = React.useState(false);
-    const [waitingWorker, setWaitingWorker] = React.useState<ServiceWorker | null>(null);
-  
-    const onSWUpdate = (registration: ServiceWorkerRegistration) => {
-      setShowReload(true);
-      setWaitingWorker(registration.waiting);
-    };
-  
-    useEffect(() => {
-      serviceWorker.register({ onUpdate: onSWUpdate });
-    }, []);
-  
-    const reloadPage = () => {
-      waitingWorker?.postMessage({ type: 'SKIP_WAITING' });
-      setShowReload(false);
-      window.location.reload();
-    };
-
-
 	const [progress, setProgress] = useState(0);
 	const [caretakerID, setCaretakerID] = useState("");
 	const [patientID, setPatientID] = useState("");
@@ -280,7 +261,7 @@ function App() {
 				<CssBaseline />
 
 				<form className="App-header">
-					<img src={`logo192.png`} srcSet={`logo192.png`} alt={`poop-logo`} onClick={reloadPage} loading="lazy" />
+					<img src={`logo192.png`} srcSet={`logo192.png`} alt={`poop-logo`} onClick={admin} loading="lazy" />
                     <input className="hidden" id="date" name="date" value={startDate}/>
                     <input className="hidden" id="time" name="time" value={startTime}/>
                     <input className="hidden" id="progress" name="progress" value={progress || ''}/>
