@@ -14,7 +14,7 @@
 }
 
 .App-header {
-  background-color: #282c34;
+  background-color: #012169;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -43,6 +43,10 @@
   margin: 20px !important;
 }
 
+.livv {
+  text-align: start !important;
+}
+
 #adminPanel {
   margin: 42px;
   padding: 13px;
@@ -61,7 +65,7 @@
   box-shadow: 0 15px 25px rgba(129, 124, 124, 0.2);
   border-radius: 5px;
   backdrop-filter: blur(14px);
-  background-color: rgba(255, 255, 255, 0.2);
+  background-color: rgba(255, 255, 255, 0.308);
   padding: 10px;
   text-align: center;
 }

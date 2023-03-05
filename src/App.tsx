@@ -1,14 +1,14 @@
 import React, { useState, useEffect, useMemo } from "react";
 import flow from "./flow.json";
-import * as serviceWorker from './serviceWorkerRegistration';
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 import Button from "@mui/material/Button";
 import ButtonGroup from "@mui/material/ButtonGroup";
-import Card from "@mui/material/Card";
 import Grid from "@mui/material/Grid";
 import TextField from "@mui/material/TextField";
+import logo from "./logo.png";
 import "./App.css";
+import addNotification from "react-push-notification";
 
 const darkTheme = createTheme({
 	palette: {
@@ -17,6 +17,7 @@ const darkTheme = createTheme({
 });
 
 function App() {
+ //  State Variables
 	const [progress, setProgress] = useState(0);
 	const [caretakerID, setCaretakerID] = useState("");
 	const [patientID, setPatientID] = useState("");
@@ -45,6 +46,7 @@ function App() {
 
     const [session, setSession] = useState([{}]);
 
+// React Use Lifecycle Methods
     const fetchPrompt = (() => {
         let question = flow[progress][`question`];
 
@@ -97,6 +99,7 @@ function App() {
         }
     }, [caretakerID, patientID, rifaxPres, providerNumber, maxBM, idealBM, alarmMaxBM])
 
+// Navigation
 	const start = () => {
         let junk = session;
         junk.shift();
@@ -116,10 +119,6 @@ function App() {
 		document.getElementById(`start`)?.classList.add(`hidden`);
         document.getElementById(`patients`)?.classList.remove(`hidden`);
         document.getElementById(`control`)?.classList.add(`hidden`);
-	}
-
-    const patients = () => {
-        document.getElementById(`patientsView`)?.classList.toggle(`hidden`);
 	}
 
     const questionaire = () => {
@@ -147,7 +146,7 @@ function App() {
 	const prev = () => {
         setProgress(progress - 1);
         onChangeDate(new Date());
-        storeSession();
+        storeSession(false);
 
         if (progress === 1){
             document.getElementById(`prev`)?.classList.add(`hidden`);
@@ -158,19 +157,30 @@ function App() {
 	}
 
 	const next = () => {
-        setProgress(progress + 1);
         onChangeDate(new Date());
-        storeSession();
+        if (progress  === 4 && HEyn === 'Y' && numBM < alarmMaxBM){
+            setProgress(progress + 1);
+            storeSession(true);
+        } else if (progress === 8) {
+            setProgress(progress + 1);
+            storeSession(true);
+        } else {
+            setProgress(progress + 1);
+            storeSession(false);
+        }
+
         document.getElementById(`prev`)?.classList.remove(`hidden`);
 	}
-    
-    const storeSession = () => {
-       let data = Object.fromEntries(new FormData(document.querySelector('form')).entries())
 
-        let tmp = { "unique": Date.now(),
+//  Session state managment   
+    const storeSession = (notify:boolean) => {
+       let data = Object.fromEntries(new FormData(document.querySelector('form')).entries())
+       let uni = Date.now();
+
+        let tmp = { "unique": uni,
                     "caretakerID": data.caretakerID, 
                     "patientID": data.patientID, 
-                    "progress": data.progress, 
+                    "progress": notify ? (Number(data.progress) + 1) : data.progress, 
                     "date": data.date,                    
                     "time": data.time,
                     "rifaxPres": data.rifaxPres,
@@ -200,18 +210,42 @@ function App() {
 
         shift.push(tmp);
         setSession(shift);
+
+        if (notify) {
+            document.getElementById(`next`)?.classList.add(`hidden`);
+            setTimeout(() => {         
+                addNotification({
+                    title: `Patient` + patientID + ` is due for a check in!`,
+                    message: 'Last session progress Stage ' + progress ,
+                    duration: 10000,
+                    icon: logo,
+                    native: true,
+                    onClick: () => load(uni)
+                });
+                document.getElementById(`next`)?.classList.remove(`hidden`);
+            }, 7200000);
+        }
     }
 
+//  Page DOM Manipulators
 	const admin = () => { document.getElementById(`adminPanel`)?.classList.toggle(`hidden`); }
 
-    const load = (e) => {
+    const patients = () => {
+        document.getElementById(`patientsView`)?.classList.toggle(`hidden`);
+	}
+
+    const loadHandler = (e) => {
+        let patientUni = e.target.id;
+        load(patientUni);
+    }
+
+    const load = (id) => {
         document.getElementById(`next`)?.classList.remove(`hidden`);
         document.getElementById(`prev`)?.classList.remove(`hidden`);
         document.getElementById(`prompt`)?.classList.remove(`hidden`);
         document.getElementById(`patientsView`)?.classList.add(`hidden`);
 
-        let patientUni = e.target.id;
-        var result = session.find(obj => obj[`unique`] == patientUni)
+        var result = session.find(obj => obj[`unique`] == id)
 
         setProgress( Number(result[`progress`]));
         setAlarmMaxBM(result[`alarmMaxBM`]);
@@ -234,6 +268,15 @@ function App() {
         setRifaxYN(result[`rifaxYN`]);
     }
 
+    const phoneFormat = (input) => { //returns (###) ###-####
+        input = input.replace(/\D/g,'');
+        var size = input.length;
+        if (size>0) {input="("+input}
+        if (size>3) {input=input.slice(0,4)+") "+input.slice(4,11)}
+        if (size>6) {input=input.slice(0,9)+"-" +input.slice(9)}
+        return input; 
+    }
+
     var startDate = "PoopData Session For " + date.getDate() + "/"
         + (date.getMonth() + 1)  + "/" 
         + date.getFullYear() ;
@@ -243,57 +286,48 @@ function App() {
         + (date.getMinutes() < 10 ? '0' : '') + date.getMinutes();
 
     var patientsList = session.reverse().map(function(el){
-                    return <ul onClick={load} id={el['unique']} className="App-link">{el['caretakerID'] + " for " + el['patientID'] + " Stage " + el['progress'] + el[`time`]}</ul>;
+                    return <div onClick={loadHandler} id={el['unique']} className="App-link">{el['caretakerID'] + " for " + el['patientID'] + " Stage " + el['progress'] + el[`time`]}</div>;
                     });
-
-    function phoneFormat(input) { //returns (###) ###-####
-        input = input.replace(/\D/g,'');
-        var size = input.length;
-        if (size>0) {input="("+input}
-        if (size>3) {input=input.slice(0,4)+") "+input.slice(4,11)}
-        if (size>6) {input=input.slice(0,9)+"-" +input.slice(9)}
-        return input; 
-    }
-    
+                    
 	return (
 		<div className="App">
-			<ThemeProvider theme={darkTheme}>
+			<ThemeProvider theme={ darkTheme }>
 				<CssBaseline />
 
 				<form className="App-header">
-					<img src={`logo192.png`} srcSet={`logo192.png`} alt={`poop-logo`} onClick={admin} loading="lazy" />
-                    <input className="hidden" id="date" name="date" value={startDate}/>
-                    <input className="hidden" id="time" name="time" value={startTime}/>
-                    <input className="hidden" id="progress" name="progress" value={progress || ''}/>
-					<p className="card">Poop PWA - Stage {progress || ''}</p>
+					<img src={`logo192.png`} srcSet={ logo } alt={`poop-logo`} onClick={ admin } loading="lazy" />
+                    <input className="hidden" id="date" name="date" value={ startDate }/>
+                    <input className="hidden" id="time" name="time" value={ startTime }/>
+                    <input className="hidden" id="progress" name="progress" value={ progress }/>
+					<p className="card">Poop PWA - Stage { progress }</p>
 
-					<div id="prompt" className="questions card">{memoizedVal || ''}</div>
+					<div id="prompt" className="questions card">{ memoizedVal || '' }</div>
 
                     <TextField 
                         id="numBm" 
                         name="numBM" 
                         label="Number" 
-                        inputProps={{ className: `${progress === 1 ? "" : "hidden"}`,
+                        inputProps={{ className: `${ progress === 1 ? "" : "hidden" }`,
                                         inputMode: `numeric` }} 
                         variant="filled" 
-                        value={numBM || ''}  
+                        value={ numBM || ''}  
                         onChange={(e) => setNumBM(e.target.value)}
                         />
                     <TextField 
                         id="numLact" 
                         name="numLact" 
                         label="Number" 
-                        inputProps={{ className: `${progress === 2 ? "" : "hidden"}`,
+                        inputProps={{ className: `${ progress === 2 ? "" : "hidden" }`,
                                         inputMode: `numeric` }} 
                         variant="filled" 
-                        value={numLact || ''}  
+                        value={ numLact || ''}  
                         onChange={(e) => setNumLact(e.target.value)}
                         />
                     <TextField 
                         id="rifaxYN" 
                         name="rifaxYN" 
                         label="Y/N" 
-                        inputProps={{ className: `${progress === 3 ? "" : "hidden"}` }} 
+                        inputProps={{ className: `${progress === 3 ? "" : "hidden" }` }} 
                         variant="filled" 
                         value={rifaxYN || ''}  
                         onChange={(e) => e.target.value.toUpperCase() ==='Y' || e.target.value.toUpperCase() ==='N' ? setRifaxYN(e.target.value.toUpperCase()) : setRifaxYN('')} 
@@ -302,38 +336,38 @@ function App() {
                         id="HEyn" 
                         name="HEyn" 
                         label="Y/N" 
-                        inputProps={{ className: `${progress === 4 ? "" : "hidden"}` }} 
+                        inputProps={{ className: `${ progress === 4 ? "" : "hidden" }` }} 
                         variant="filled" 
-                        value={HEyn || ''}  
+                        value={ HEyn || ''}  
                         onChange={(e) => e.target.value.toUpperCase() ==='Y' || e.target.value.toUpperCase() ==='N' ? setHEyn(e.target.value.toUpperCase()) : setHEyn('')} 
                         />
                     <TextField 
                         id="numLactCheckOne" 
                         name="numLactCheckOne" 
                         label="Number" 
-                        inputProps={{ className: `${progress === 6 ? "" : "hidden"}`,
+                        inputProps={{ className: `${ progress === 6 ? "" : "hidden" }`,
                                         inputMode: `numeric` }} 
                         variant="filled" 
-                        value={numLactCheckOne || ''}  
+                        value={ numLactCheckOne || ''}  
                         onChange={(e) => setNumLactCheckOne(e.target.value)}
                         />
                     <TextField 
                         id="numBMCheckOne" 
                         name="numBMCheckOne" 
                         label="Number" 
-                        inputProps={{ className: `${progress === 7 ? "" : "hidden"}`,
+                        inputProps={{ className: `${ progress === 7 ? "" : "hidden" }`,
                                         inputMode: `numeric` }} 
                         variant="filled"
-                        value={numBMCheckOne || ''}  
+                        value={ numBMCheckOne || '' }  
                         onChange={(e) => setNumBMCheckOne(e.target.value)} 
                         />
                     <TextField 
                         id="HEynCheckOne"
                         name="HEynCheckOne" 
                         label="Y/N" 
-                        inputProps={{ className: `${progress === 8 ? "" : "hidden"}` }} 
+                        inputProps={{ className: `${ progress === 8 ? "" : "hidden" }` }} 
                         variant="filled" 
-                        value={HEynCheckOne || ''}  
+                        value={ HEynCheckOne || ''}  
                         onChange={(e) => e.target.value.toUpperCase() ==='Y' || e.target.value.toUpperCase() ==='N' ? setHEynCheckOne(e.target.value.toUpperCase()) : setHEynCheckOne('')} 
                         />
                     <TextField 
@@ -341,47 +375,47 @@ function App() {
                         name="resolvedHEBMNum" 
                         label="Number" 
                         disabled
-                        inputProps={{ className: `${progress === 9 ? "hidden" : "hidden"}`,
+                        inputProps={{ className: `${ progress === 9 ? "hidden" : "hidden" }`,
                                         inputMode: `numeric` }} 
                         variant="filled" 
-                        value={resolvedHEBMNum || ''}  
+                        value={ resolvedHEBMNum || '' }  
                         onChange={(e) => setResolvedHEBMNum(e.target.value)}
                         />
                     <TextField 
                         id="HEynCheckOne"
                         name="HEynCheckOne" 
                         label="Number" 
-                        inputProps={{ className: `${progress === 9 ? "hidden" : "hidden"}` }} 
+                        inputProps={{ className: `${ progress === 9 ? "hidden" : "hidden" }` }} 
                         variant="filled" 
-                        value={HEynCheckOne || ''}  
+                        value={ HEynCheckOne || '' }  
                         onChange={(e) => e.target.value.toUpperCase() ==='Y' || e.target.value.toUpperCase() ==='N' ? setHEynCheckOne(e.target.value.toUpperCase()) : setHEynCheckOne('')} 
                         />
                     <TextField 
                         id="numLactCheckTwo" 
                         name="numLactCheckTwo" 
                         label="Number" 
-                        inputProps={{ className: `${progress === 10 ? "" : "hidden"}` }} 
+                        inputProps={{ className: `${ progress === 10 ? "" : "hidden" }` }} 
                         variant="filled"
-                        value={numLactCheckTwo || ''}  
-                        onChange={(e) =>  setNumLactCheckTwo(e.target.value) } 
+                        value={ numLactCheckTwo || '' }  
+                        onChange={(e) => setNumLactCheckTwo(e.target.value) } 
                         />
                     <TextField 
                         id="numBMCheckTwo" 
                         name="numBMCheckTwo" 
                         label="Number" 
-                        inputProps={{ className: `${progress === 11 ? "" : "hidden"}`,
+                        inputProps={{ className: `${ progress === 11 ? "" : "hidden" }`,
                                         inputMode: `numeric` }} 
                         variant="filled" 
-                        value={numBMCheckTwo || ''}  
+                        value={numBMCheckTwo || '' }  
                         onChange={(e) => setNumBMCheckTwo(e.target.value)}
                         />
                     <TextField 
                         id="HEynCheckTwo"
                         name="HEynCheckTwo" 
                         label="Number" 
-                        inputProps={{ className: `${progress === 12 ? "" : "hidden"}` }} 
+                        inputProps={{ className: `${ progress === 12 ? "" : "hidden" }` }} 
                         variant="filled" 
-                        value={HEynCheckTwo || ''}  
+                        value={ HEynCheckTwo || '' }  
                         onChange={(e) => e.target.value.toUpperCase() ==='Y' || e.target.value.toUpperCase() ==='N' ? setHEynCheckTwo(e.target.value.toUpperCase()) : setHEynCheckTwo('')} 
                         />
                     <TextField 
@@ -389,23 +423,23 @@ function App() {
                         name="resolvedHEBMNum" 
                         label="Number" 
                         disabled
-                        inputProps={{ className: `${HEynCheckTwo === 'Y' && progress === 13 ? "" : "hidden"}` ,
+                        inputProps={{ className: `${ HEynCheckTwo === 'Y' && progress === 13 ? "" : "hidden" }` ,
                                         inputMode: `numeric` }} 
                         variant="filled"
-                        value={resolvedHEBMNum || ''}  
+                        value={ resolvedHEBMNum || '' }  
                         onChange={(e) => setResolvedHEBMNum(e.target.value)}
                         />
 
-					<Card id="adminPanel" className="hidden">
+					<div id="adminPanel" className="hidden card">
                         <h5>Enter your CaretakerID and Patient Info.</h5>
-                        <Grid container direction={"column"} spacing={5}>
+                        <Grid container className="livv" direction={"column"} spacing={5}>
                             <Grid item >
                                 <TextField 
                                     id="caretakerID" 
                                     name="caretakerID" 
                                     label="caretakerID" 
                                     variant="outlined" 
-                                    value={caretakerID || ''} 
+                                    value={ caretakerID || '' } 
                                     onChange={(e) => setCaretakerID(e.target.value.toUpperCase())}
                                     />
                                 <TextField 
@@ -413,7 +447,7 @@ function App() {
                                     name="patientID" 
                                     label="patientID" 
                                     variant="outlined"
-                                    value={patientID || ''} 
+                                    value={ patientID || '' } 
                                     onChange={(e) => setPatientID(e.target.value.toUpperCase())}
                                     />
                             </Grid>
@@ -423,16 +457,16 @@ function App() {
                                     name="rifaxPres" 
                                     label="rifaxPres" 
                                     variant="outlined" 
-                                    value={rifaxPres || ''} 
+                                    value={ rifaxPres || '' } 
                                     onChange={(e) => e.target.value.toUpperCase() ==='Y' || e.target.value.toUpperCase() ==='N' ? setRifaxPres(e.target.value.toUpperCase()) : setRifaxPres('')} 
                                     />
                                 <TextField 
                                     id="providerNumber" 
                                     name="providerNumber" 
                                     label="providerNumber" 
-                                    inputProps={{inputMode: `numeric` }} 
+                                    inputProps={{ inputMode: `numeric` }} 
                                     variant="outlined" 
-                                    value={providerNumber || ''} 
+                                    value={ providerNumber || '' } 
                                     onChange={(e) => setProviderNumber(phoneFormat(e.target.value))}
                                     />
                             </Grid>
@@ -441,59 +475,57 @@ function App() {
                                     id="maxBM" 
                                     name="maxBM" 
                                     label="maxBM" 
-                                    inputProps={{inputMode: `numeric` }} 
+                                    inputProps={{ inputMode: `numeric` }} 
                                     variant="outlined" 
-                                    value={maxBM || ''}  
+                                    value={ maxBM || '' }  
                                     onChange={(e) => setMaxBM(e.target.value)} 
                                     />
                                 <TextField 
                                     id="idealBM" 
                                     name="idealBM" 
                                     label="idealBM" 
-                                    inputProps={{inputMode: `numeric` }} 
+                                    inputProps={{ inputMode: `numeric` }} 
                                     variant="outlined" 
-                                    value={idealBM || ''} 
+                                    value={ idealBM || '' } 
                                     onChange={(e) => setIdealBM(e.target.value)} 
                                     />
                                 <TextField 
                                     id="alarmMaxBM" 
                                     name="alarmMaxBM" 
                                     label="alarmMaxBM"
-                                    inputProps={{inputMode: `numeric` }}  
+                                    inputProps={{ inputMode: `numeric` }}  
                                     variant="outlined" 
-                                    value={alarmMaxBM || ''} 
+                                    value={ alarmMaxBM || '' } 
                                     onChange={(e) => setAlarmMaxBM(e.target.value)}
                                     />
                             </Grid>
                         </Grid>
-                        <ButtonGroup variant="outlined" className="response" aria-label="outlined button group">
-                            <Button id="questionaire" className="hidden" color="success" onClick={questionaire}>Continue</Button>
-                        </ButtonGroup>
-					</Card>
+                        <Button id="questionaire" variant="outlined" className="hidden" color="success" onClick={ questionaire }>Continue</Button>
+					</div>
 
                     <div id="patientsView" className="card hidden">
-                        <div>{startDate}</div>
-                        {progress !== 0 &&  <ol>{ patientsList }</ol>}
+                        <div>{ startDate }</div>
+                        { progress !== 0 &&  <div>{ patientsList } </div> }
                     </div>
       
 
 					<ButtonGroup id="control" variant="outlined" className="response hidden" aria-label="outlined button group">
-						<Button id="prev" color="error" onClick={prev}>Previous</Button>
-						<Button id="next" color="success" onClick={next}>Next</Button>
+						<Button id="prev" color="error" onClick={ prev }>Previous</Button>
+						<Button id="next" color="success" onClick={ next }>Next</Button>
 					</ButtonGroup>
                     
                     <Button id="start" className="start" variant="contained" onClick={start}>Start</Button>
 
 					<ButtonGroup id="navigation" variant="outlined" className="response" aria-label="outlined button group">
-                        <Button id="patients" className="start hidden" variant="contained" onClick={patients}>Current Patient - {patientID || ''}</Button>
+                        <Button id="patients" className="start hidden" variant="contained" onClick={ patients }>Current Patient - { patientID || ''}</Button>
                         {progress !== 0 && <Button 
                                                 id="download" 
                                                 className="start" 
                                                 variant="contained" 
                                                 href={`data:text/json;charset=utf-8,${encodeURIComponent(JSON.stringify(Object.fromEntries(new FormData(document.querySelector('form')).entries())))}`} 
-                                                download={`poopData ${patientID || ''} ${Date.now()}.json`}
-                                                > Download {patientID || ''} Report </Button>}
-                        {progress !== 0 && <Button id="newPatient" className="start" variant="contained" onClick={newPatient}>New Patient</Button>}
+                                                download={`poopData ${ patientID || ''} ${Date.now()}.json`}
+                                                > Download { patientID || ''} Report </Button>}
+                        {progress !== 0 && <Button id="newPatient" className="start" variant="contained" onClick={ newPatient }>New Patient</Button>}
                     </ButtonGroup>
 				</form>
 			</ThemeProvider>
