@@ -194,7 +194,7 @@ function App() {
         let tmp = { "unique": uni,
                     "caretakerID": data.caretakerID, 
                     "patientID": data.patientID, 
-                    "progress": (Number(data.progress) + 1), 
+                    "progress": notify ? (Number(data.progress) + 1) : data.progress, 
                     "date": data.date,                    
                     "time": data.time,
                     "rifaxPres": data.rifaxPres,
