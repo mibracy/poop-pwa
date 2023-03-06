@@ -194,7 +194,7 @@ function App() {
         let tmp = { "unique": uni,
                     "caretakerID": data.caretakerID, 
                     "patientID": data.patientID, 
-                    "progress": notify ? (Number(data.progress) + 1) : data.progress, 
+                    "progress": (Number(data.progress) + 1), 
                     "date": data.date,                    
                     "time": data.time,
                     "rifaxPres": data.rifaxPres,
@@ -254,6 +254,7 @@ function App() {
     }
 
     const load = (id) => {
+        setProgress(0);
         document.getElementById(`next`)?.classList.remove(`hidden`);
         document.getElementById(`prev`)?.classList.remove(`hidden`);
         document.getElementById(`prompt`)?.classList.remove(`hidden`);
@@ -282,7 +283,7 @@ function App() {
 
         setTimeout(() => {         
             setProgress(Number(result[`progress`]));
-        }, 1000);
+        }, 1500);
         
     }
 
