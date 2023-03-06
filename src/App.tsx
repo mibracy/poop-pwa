@@ -255,9 +255,9 @@ function App() {
 
     const load = (id) => {
         setProgress(0);
-        document.getElementById(`next`)?.classList.remove(`hidden`);
-        document.getElementById(`prev`)?.classList.remove(`hidden`);
-        document.getElementById(`prompt`)?.classList.remove(`hidden`);
+        document.getElementById(`next`)?.classList.add(`hidden`);
+        document.getElementById(`prev`)?.classList.add(`hidden`);
+        document.getElementById(`prompt`)?.classList.add(`hidden`);
         document.getElementById(`patientsView`)?.classList.add(`hidden`);
 
         var result = session.find(obj => obj[`unique`] == id)
@@ -283,6 +283,9 @@ function App() {
 
         setTimeout(() => {         
             setProgress(Number(result[`progress`]));
+            document.getElementById(`prompt`)?.classList.remove(`hidden`);
+            document.getElementById(`next`)?.classList.remove(`hidden`);
+            document.getElementById(`prev`)?.classList.remove(`hidden`);
         }, 1500);
         
     }
